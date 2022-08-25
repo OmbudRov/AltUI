@@ -51,13 +51,16 @@ public class AltUIPlugin extends Plugin
 
 	private AltUIAccountManagerFrame currentManager = null;
 
-	private File AltUIDirectory = new File(RuneLite.RUNELITE_DIR,"AltUI");
+	private File AltUIDirectory = new File(RuneLite.RUNELITE_DIR, "AltUI");
 
 	private ArrayList<GroundItem> nearbyItems = new ArrayList<>();
 
+	//Implement way to make the stacking of the bars dynamic using Size of the bars(if enabled) by passing the sum of Respective Bar and the other's bar size as an argument
 	private AltUIPrayerOverlay AltUIPrayerPanel = null;
+	protected int Pbar = 0;
 
 	private AltUIHitpointsOverlay AltUIHitpointsPanel = null;
+	protected int Hbar = 0;
 	private AltUIRSNOverlay AltUIRSNOverlay = null;
 
 	private AltUIShoutOverlay AltUIShoutPanel = null;
@@ -69,10 +72,6 @@ public class AltUIPlugin extends Plugin
 
 	public static final String LOCK_FILE = "AltUIDisableBLACKOUT.txt";
 
-	//GP/hr tracking
-	public int GPhr = 0;
-	protected int PSize=0;
-	protected int HSize=0;
 
 	public final File[] files = {
 		new File(RuneLite.RUNELITE_DIR, "AltUI\\yoink.wav"),
@@ -111,8 +110,10 @@ public class AltUIPlugin extends Plugin
 
 	float timeElapsed = 0;
 
-	private void updatePrayer() {
-		if(!config.PrayerBar()) {
+	private void updatePrayer()
+	{
+		if (!config.PrayerBar())
+		{
 			overlayManager.remove(AltUIPrayerPanel);
 			return;
 		}
@@ -122,8 +123,11 @@ public class AltUIPlugin extends Plugin
 		AltUIPrayerPanel.Currentprayer = client.getBoostedSkillLevel(Skill.PRAYER);
 		AltUIPrayerPanel.gameWidth = client.getViewportWidth();
 	}
-	private void updateHitpoints() {
-		if(!config.HitpointsBar()) {
+
+	private void updateHitpoints()
+	{
+		if (!config.HitpointsBar())
+		{
 			overlayManager.remove(AltUIHitpointsPanel);
 			return;
 		}
@@ -133,39 +137,53 @@ public class AltUIPlugin extends Plugin
 		AltUIHitpointsPanel.CurrentHitpoints = client.getBoostedSkillLevel(Skill.HITPOINTS);
 		AltUIHitpointsPanel.gameWidth = client.getViewportWidth();
 	}
-	private void updateRSN() {
-		if(!config.rsnDisplay()) {
+
+	private void updateRSN()
+	{
+		if (!config.rsnDisplay())
+		{
 			overlayManager.remove(AltUIRSNOverlay);
 			return;
 		}
 		overlayManager.add(AltUIRSNOverlay);
 	}
-	private void updateShout() {
-		boolean[] thingsToBeFussedAbout = new boolean[]{false,false,false};
+
+	private void updateShout()
+	{
+		boolean[] thingsToBeFussedAbout = new boolean[]{false, false, false};
 		boolean any = false;
-		if(config.tooAFKIndicator() && tooAFK()) {
+		if (config.tooAFKIndicator() && tooAFK())
+		{
 			thingsToBeFussedAbout[AltUIShoutOverlay.TOO_AFK] = true;
 			any = true;
 		}
-		if(config.treasureNear() && shardNear()) {
+		if (config.treasureNear() && shardNear())
+		{
 			thingsToBeFussedAbout[AltUIShoutOverlay.SHARD_NEARBY] = true;
 			any = true;
 		}
-		if(config.goBank() && inventoryFull()) {
+		if (config.goBank() && inventoryFull())
+		{
 			thingsToBeFussedAbout[AltUIShoutOverlay.GO_BANK] = true;
 			any = true;
 		}
 		AltUIShoutPanel.thingsToBeFussedAbout = thingsToBeFussedAbout;
 		AltUIShoutPanel.viewportWidth = client.getViewportWidth();
 		AltUIShoutPanel.viewportHeight = client.getViewportHeight();
-		if(any) {
+		if (any)
+		{
 			overlayManager.add(AltUIShoutPanel);
-		} else {
+		}
+		else
+		{
 			overlayManager.remove(AltUIShoutPanel);
 		}
 	}
-	private void updateNearby() {
-		if(!config.doNearbyDrops()) {
+
+	private void updateNearby()
+	{
+		if (!config.doNearbyDrops())
+		{
 			overlayManager.remove(AltUINearbyPanel);
 			return;
 		}
@@ -174,120 +192,158 @@ public class AltUIPlugin extends Plugin
 	}
 
 
-	public boolean isDoorClosed(int worldX, int worldY) {
-		LocalPoint coords = LocalPoint.fromWorld(client,worldX,worldY);
+	public boolean isDoorClosed(int worldX, int worldY)
+	{
+		LocalPoint coords = LocalPoint.fromWorld(client, worldX, worldY);
 		return client.getScene().getTiles()[0][coords.getSceneX()][coords.getSceneY()].getWallObject() != null;
 	}
 
-	public String getItemName(int id) {
+	public String getItemName(int id)
+	{
 		return client.getItemDefinition(id).getName();
 	}
-	public int getItemPrice(int id) {
+
+	public int getItemPrice(int id)
+	{
 		return itemManager.getItemPrice(id);
 	}
 
-	public boolean inventoryFull() {
+	public boolean inventoryFull()
+	{
 		ItemContainer invent = client.getItemContainer(InventoryID.INVENTORY);
-		if(invent == null) {
+		if (invent == null)
+		{
 			return false;
 		}
-		if(invent.getItems().length < 28) {
+		if (invent.getItems().length < 28)
+		{
 			return false;
 		}
 		boolean full = true;
-		for(Item i : invent.getItems()) {
-			if(i == null) {
+		for (Item i : invent.getItems())
+		{
+			if (i == null)
+			{
 				full = false;
 				break;
 			}
-			if(i.getQuantity() == 0) {
+			if (i.getQuantity() == 0)
+			{
 				full = false;
 			}
 		}
 		return full;
 	}
 
-	public boolean shardNear() {
-		for(GroundItem i : nearbyItems) {
-			if(i.id == ItemID.BLOOD_SHARD) {
+	public boolean shardNear()
+	{
+		for (GroundItem i : nearbyItems)
+		{
+			if (i.id == ItemID.BLOOD_SHARD)
+			{
 				return true;
 			}
 		}
 		return false;
 	}
-	public boolean tooAFK() {
+
+	public boolean tooAFK()
+	{
 		Player localPlayer = client.getLocalPlayer();
-		if(localPlayer == null) {
+		if (localPlayer == null)
+		{
 			return false;
 		}
-		if(localPlayer.getPlayerComposition().getEquipmentId(KitType.TORSO) == ItemID.VYRE_NOBLE_TOP || localPlayer.getPlayerComposition().getEquipmentId(KitType.LEGS) == ItemID.VYRE_NOBLE_LEGS || localPlayer.getPlayerComposition().getEquipmentId(KitType.BOOTS) == ItemID.VYRE_NOBLE_SHOES) {
+		if (localPlayer.getPlayerComposition().getEquipmentId(KitType.TORSO) == ItemID.VYRE_NOBLE_TOP || localPlayer.getPlayerComposition().getEquipmentId(KitType.LEGS) == ItemID.VYRE_NOBLE_LEGS || localPlayer.getPlayerComposition().getEquipmentId(KitType.BOOTS) == ItemID.VYRE_NOBLE_SHOES)
+		{
 			return true;
 		}
-		if(client.getVarpValue(172) == 1) {
+		if (client.getVarpValue(172) == 1)
+		{
 			return true;
 		}
 		return false;
 	}
 
-	public boolean isPrayerOff() {
-		for (Prayer pray : Prayer.values())	{
-			if (client.isPrayerActive(pray)) {
+	public boolean isPrayerOff()
+	{
+		for (Prayer pray : Prayer.values())
+		{
+			if (client.isPrayerActive(pray))
+			{
 				return false;
 			}
 		}
 		return true;
 	}
 
-	public boolean LowPrayer() {
+	public boolean LowPrayer()
+	{
 		//this account
-		if(client.getBoostedSkillLevel(Skill.PRAYER) <= config.PrayerThreshold()) {
+		if (client.getBoostedSkillLevel(Skill.PRAYER) <= config.PrayerThreshold())
+		{
 			return true;
 		}
 		//any account
 		ArrayList<AltUIAccountInfo> info = altUIAccountManager.getAllAccountInfo();
-		for(AltUIAccountInfo i : info) {
-			if(i.prayer <= config.PrayerThreshold()) {
+		for (AltUIAccountInfo i : info)
+		{
+			if (i.prayer <= config.PrayerThreshold())
+			{
 				return true;
 			}
 		}
 		return false;
 	}
-	public boolean LowHitpoints() {
+
+	public boolean LowHitpoints()
+	{
 		//this account
-		if(client.getBoostedSkillLevel(Skill.HITPOINTS) <= config.HitpointsThreshold()) {
+		if (client.getBoostedSkillLevel(Skill.HITPOINTS) <= config.HitpointsThreshold())
+		{
 			return true;
 		}
 		//any account
 		ArrayList<AltUIAccountInfo> info = altUIAccountManager.getAllAccountInfo();
-		for(AltUIAccountInfo i : info) {
-			if(i.health <= config.HitpointsThreshold()) {
+		for (AltUIAccountInfo i : info)
+		{
+			if (i.health <= config.HitpointsThreshold())
+			{
 				return true;
 			}
 		}
 		return false;
 	}
-	public boolean ignoreItem(int id) {
+
+	public boolean ignoreItem(int id)
+	{
 		String name = getItemName(id);
 		return ignoreItem(name);
 	}
 
-	public boolean ignoreItem(String name) {
-		for(String s : config.nearbyBlacklist().split(",")) {
-			if(s.equalsIgnoreCase(name)) {
+	public boolean ignoreItem(String name)
+	{
+		for (String s : config.nearbyBlacklist().split(","))
+		{
+			if (s.equalsIgnoreCase(name))
+			{
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public String getRSN() {
-		if(client.getLocalPlayer() == null || client.getLocalPlayer().getName() == null) {
+	public String getRSN()
+	{
+		if (client.getLocalPlayer() == null || client.getLocalPlayer().getName() == null)
+		{
 			return "?";
 		}
 		return client.getLocalPlayer().getName();
 	}
 
-	private void removeAllPanels() {
+	private void removeAllPanels()
+	{
 		overlayManager.remove(AltUIPrayerPanel);
 		overlayManager.remove(AltUIHitpointsPanel);
 		overlayManager.remove(AltUIRSNOverlay);
@@ -299,11 +355,19 @@ public class AltUIPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
+		if(config.PrayerBar())
+			Pbar=config.PrayerSize();
+		else
+			Pbar=0;
+		if(config.HitpointsBar())
+			Pbar=config.HitpointsSize();
+		else
+			Hbar=0;
 		altUIAccountManager = new AltUIAccountManager(AltUIDirectory);
-		AltUIPrayerPanel = new AltUIPrayerOverlay(this,0,0, config.PrayerThreshold(),config.PrayerBackground(),config.PrayerForeground(),config.PrayerForegroundLow(),config.PrayerForegroundOff(),config.PrayerFlashing());
-		AltUIHitpointsPanel = new AltUIHitpointsOverlay(this,0,0, config.HitpointsThreshold(),config.HitpointsBackground(),config.HitpointsForeground(),config.HitpointsForegroundLow(),config.HitpointsForegroundOff(),config.HitpointsFlashing());
+		AltUIPrayerPanel = new AltUIPrayerOverlay(this, 0, 0, config.PrayerThreshold(), config.PrayerBackground(), config.PrayerForeground(), config.PrayerForegroundLow(), config.PrayerForegroundOff(), config.PrayerFlashing());
+		AltUIHitpointsPanel = new AltUIHitpointsOverlay(this, 0, 0, config.HitpointsThreshold(), config.HitpointsBackground(), config.HitpointsForeground(), config.HitpointsForegroundLow(), config.HitpointsForegroundOff(), config.HitpointsFlashing(),Pbar);
 		AltUIRSNOverlay = new AltUIRSNOverlay(this);
-		AltUIShoutPanel = new AltUIShoutOverlay(this,client.getViewportWidth(),client.getViewportHeight());
+		AltUIShoutPanel = new AltUIShoutOverlay(this, client.getViewportWidth(), client.getViewportHeight());
 		AltUINearbyPanel = new AltUINearbyPanel(this);
 		updateConfig();
 
@@ -348,7 +412,7 @@ public class AltUIPlugin extends Plugin
 		// Using loop instead of start + setFramePosition prevents the clip
 		// from not being played sometimes, presumably a race condition in the
 		// underlying line driver
-		clips[index].loop(justOnce ? 0 : Math.min(Math.max(0,config.loopBlasters()-1),100));
+		clips[index].loop(justOnce ? 0 : Math.min(Math.max(0, config.loopBlasters() - 1), 100));
 	}
 
 	private boolean tryLoadNotification(byte index)
@@ -372,35 +436,44 @@ public class AltUIPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked clicked) {
-		if(clicked.getMenuOption().toLowerCase().contains("take")) {
+	public void onMenuOptionClicked(MenuOptionClicked clicked)
+	{
+		if (clicked.getMenuOption().toLowerCase().contains("take"))
+		{
 			takingItem = 10;
 		}
 	}
 
-	private void clearNearbyItems() {
+	private void clearNearbyItems()
+	{
 		nearbyItems.clear();
 		AltUINearbyPanel.nearbyItems.clear();
 	}
 
 	@Subscribe
-	public void onOverlayMenuClicked(OverlayMenuClicked event) {
-		if(event.getEntry().getMenuAction() == MenuAction.RUNELITE_OVERLAY &&
+	public void onOverlayMenuClicked(OverlayMenuClicked event)
+	{
+		if (event.getEntry().getMenuAction() == MenuAction.RUNELITE_OVERLAY &&
 			event.getEntry().getTarget().equals("List") &&
-			event.getEntry().getOption().equals("Clear")) {
+			event.getEntry().getOption().equals("Clear"))
+		{
 			clearNearbyItems();
 		}
 
 	}
 
-	private Item[] getInventoryList(ItemContainerChanged changed) {
-		return ArrayUtils.addAll(changed.getItemContainer().getItems(),client.getItemContainer(InventoryID.EQUIPMENT).getItems());
+	private Item[] getInventoryList(ItemContainerChanged changed)
+	{
+		return ArrayUtils.addAll(changed.getItemContainer().getItems(), client.getItemContainer(InventoryID.EQUIPMENT).getItems());
 	}
 
 	@Subscribe
-	public void onNpcLootReceived(NpcLootReceived npcLootReceived) {
-		for(ItemStack i : npcLootReceived.getItems()) {
-			if(i.getId() == ItemID.BLOOD_SHARD) {
+	public void onNpcLootReceived(NpcLootReceived npcLootReceived)
+	{
+		for (ItemStack i : npcLootReceived.getItems())
+		{
+			if (i.getId() == ItemID.BLOOD_SHARD)
+			{
 				ownLootTimer = 10;
 				break;
 			}
@@ -408,37 +481,48 @@ public class AltUIPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onItemSpawned(ItemSpawned itemSpawned) {
+	public void onItemSpawned(ItemSpawned itemSpawned)
+	{
 		TileItem item = itemSpawned.getItem();
-		if (item.getId() == ItemID.BLOOD_SHARD && config.customBloodshard()) {
+		if (item.getId() == ItemID.BLOOD_SHARD && config.customBloodshard())
+		{
 			//For the yoink sounds, we'll play next tick to compare if it is the player's drop
 			playShardSoundNextTick = true;
-		} else if (item.getId() == ItemID.ONYX_BOLT_TIPS && config.customOnItsBoltTips()) {
-			playCustomSound(ONYX,config.loopUntil());
-		} else if (config.customRegularDrops() && getItemPrice(item.getId()) * item.getQuantity() >= config.nearbyThreshold()) {
-			playCustomSound(REGULAR_DROP,false);
 		}
-		if(client.getLocalPlayer() == null) {
+		else if (item.getId() == ItemID.ONYX_BOLT_TIPS && config.customOnItsBoltTips())
+		{
+			playCustomSound(ONYX, config.loopUntil());
+		}
+		else if (config.customRegularDrops() && getItemPrice(item.getId()) * item.getQuantity() >= config.nearbyThreshold())
+		{
+			playCustomSound(REGULAR_DROP, false);
+		}
+		if (client.getLocalPlayer() == null)
+		{
 			return;
 		}
 
-		if(Math.abs(itemSpawned.getTile().getWorldLocation().getX() - client.getLocalPlayer().getWorldLocation().getX()) > config.nearbyRange() ||
-			Math.abs(itemSpawned.getTile().getWorldLocation().getY() - client.getLocalPlayer().getWorldLocation().getY()) > config.nearbyRange()) {
+		if (Math.abs(itemSpawned.getTile().getWorldLocation().getX() - client.getLocalPlayer().getWorldLocation().getX()) > config.nearbyRange() ||
+			Math.abs(itemSpawned.getTile().getWorldLocation().getY() - client.getLocalPlayer().getWorldLocation().getY()) > config.nearbyRange())
+		{
 			//item is outside the range of the config
 			return;
 		}
 
 		boolean existing = false;
-		nearbyItems.add(new GroundItem(item.getId(),item.getQuantity(),itemSpawned.getTile()));
+		nearbyItems.add(new GroundItem(item.getId(), item.getQuantity(), itemSpawned.getTile()));
 
 	}
 
 	@Subscribe
-	public void onItemDespawned(ItemDespawned itemDespawned) {
+	public void onItemDespawned(ItemDespawned itemDespawned)
+	{
 		TileItem item = itemDespawned.getItem();
 
-		for(GroundItem i : nearbyItems) {
-			if(i.id == item.getId() && i.quantity == itemDespawned.getItem().getQuantity()) {
+		for (GroundItem i : nearbyItems)
+		{
+			if (i.id == item.getId() && i.quantity == itemDespawned.getItem().getQuantity())
+			{
 				nearbyItems.remove(i);
 				break;
 			}
@@ -447,18 +531,26 @@ public class AltUIPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onItemQuantityChanged(ItemQuantityChanged itemQuantityChanged) {
+	public void onItemQuantityChanged(ItemQuantityChanged itemQuantityChanged)
+	{
 		TileItem item = itemQuantityChanged.getItem();
 
-		for(GroundItem i : nearbyItems) {
-			if(i.id == item.getId() && itemQuantityChanged.getOldQuantity() == i.quantity) {
+		for (GroundItem i : nearbyItems)
+		{
+			if (i.id == item.getId() && itemQuantityChanged.getOldQuantity() == i.quantity)
+			{
 				i.quantity = itemQuantityChanged.getNewQuantity();
 				break;
 			}
 		}
 	}
 
-	public void updateConfig() {
+	public void updateConfig()
+	{
+		if(config.PrayerBar())
+			Pbar=config.PrayerSize();
+		else
+			Pbar=0;
 		AltUIPrayerPanel.backgroundColor = config.PrayerBackground();
 		AltUIPrayerPanel.foregroundColor = config.PrayerForeground();
 		AltUIPrayerPanel.flashingColor = config.PrayerFlashing();
@@ -470,7 +562,10 @@ public class AltUIPlugin extends Plugin
 		AltUIPrayerPanel.displayPrayer = config.PrayerPrayer();
 		AltUIPrayerPanel.flashInterval = config.flashyInterval();
 
-
+		if(config.HitpointsBar())
+			AltUIHitpointsPanel.barDistance=config.PrayerSize();
+		else
+			AltUIHitpointsPanel.barDistance=0;
 		AltUIHitpointsPanel.backgroundColor = config.HitpointsBackground();
 		AltUIHitpointsPanel.foregroundColor = config.HitpointsForeground();
 		AltUIHitpointsPanel.flashingColor = config.HitpointsFlashing();
@@ -487,28 +582,34 @@ public class AltUIPlugin extends Plugin
 
 		AltUIShoutPanel.flashInterval = config.flashyInterval();
 
-		if(currentManager != null) {
+		if (currentManager != null)
+		{
 			currentManager.frame.setAlwaysOnTop(config.alwaysOnTopTracker());
 		}
 	}
 
 	@Subscribe
-	public void onConfigChanged(ConfigChanged configChanged) {
+	public void onConfigChanged(ConfigChanged configChanged)
+	{
 		updateConfig();
 
-		if(configChanged.getKey().equals("launchAccountTracker")) {
-			if(currentManager != null) {
+		if (configChanged.getKey().equals("launchAccountTracker"))
+		{
+			if (currentManager != null)
+			{
 				currentManager.close();
 			}
-			currentManager = new AltUIAccountManagerFrame(altUIAccountManager,config.alwaysOnTopTracker(),this);
-			currentManager.update(config.PrayerThreshold(),config.nearbyThreshold());
+			currentManager = new AltUIAccountManagerFrame(altUIAccountManager, config.alwaysOnTopTracker(), this);
+			currentManager.update(config.PrayerThreshold(), config.nearbyThreshold());
 		}
 	}
 
 	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged) {
+	public void onGameStateChanged(GameStateChanged gameStateChanged)
+	{
 		int state = gameStateChanged.getGameState().getState();
-		if(state == GameState.HOPPING.getState() || state == GameState.LOGGING_IN.getState() || state == GameState.STARTING.getState()) {
+		if (state == GameState.HOPPING.getState() || state == GameState.LOGGING_IN.getState() || state == GameState.STARTING.getState())
+		{
 			clearNearbyItems();
 		}
 	}
@@ -516,13 +617,16 @@ public class AltUIPlugin extends Plugin
 	int previousPrayer = 0;
 	int previousHealth = 0;
 
-	public void updateStatusNoise() {
+	public void updateStatusNoise()
+	{
 
-		if(config.customPrayer() && previousPrayer > config.PrayerThreshold() && client.getBoostedSkillLevel(Skill.PRAYER) <= config.PrayerThreshold()) {
-			playCustomSound(PRAYER,false);
+		if (config.customPrayer() && previousPrayer > config.PrayerThreshold() && client.getBoostedSkillLevel(Skill.PRAYER) <= config.PrayerThreshold())
+		{
+			playCustomSound(PRAYER, false);
 		}
-		if(config.customLowHP() && previousHealth > 50 && client.getBoostedSkillLevel(Skill.HITPOINTS) <= 49) {
-			playCustomSound(HEALTH,false);
+		if (config.customLowHP() && previousHealth > 50 && client.getBoostedSkillLevel(Skill.HITPOINTS) <= 49)
+		{
+			playCustomSound(HEALTH, false);
 		}
 
 
@@ -532,33 +636,47 @@ public class AltUIPlugin extends Plugin
 
 
 	@Subscribe
-	public void onGameTick(GameTick gameTick) {
-		if(config.useAccountTracker()) {
+	public void onGameTick(GameTick gameTick)
+	{
+		if (config.useAccountTracker())
+		{
 			ArrayList<LootItem> items = new ArrayList<>();
-			for(GroundItem item : nearbyItems) {
-				items.add(new LootItem(item,this));
+			for (GroundItem item : nearbyItems)
+			{
+				items.add(new LootItem(item, this));
 			}
 		}
-		if(currentManager != null) {
-			currentManager.update(config.PrayerThreshold(),config.nearbyThreshold());
+		if (currentManager != null)
+		{
+			currentManager.update(config.PrayerThreshold(), config.nearbyThreshold());
 		}
-		if(config.loopUntil()) {
-			for(GroundItem item : nearbyItems) {
-				if(item.id == ItemID.BLOOD_SHARD && (clips[SHARD] == null || !clips[SHARD].isRunning())) {
-					playCustomSound(SHARD,true);
+		if (config.loopUntil())
+		{
+			for (GroundItem item : nearbyItems)
+			{
+				if (item.id == ItemID.BLOOD_SHARD && (clips[SHARD] == null || !clips[SHARD].isRunning()))
+				{
+					playCustomSound(SHARD, true);
 					break;
 				}
-				if(item.id == ItemID.ONYX_BOLT_TIPS && (clips[ONYX] == null || !clips[ONYX].isRunning())) {
-					playCustomSound(ONYX,true);
+				if (item.id == ItemID.ONYX_BOLT_TIPS && (clips[ONYX] == null || !clips[ONYX].isRunning()))
+				{
+					playCustomSound(ONYX, true);
 					break;
 				}
 			}
-		} else {
-			if (playShardSoundNextTick) {
-				if (ownLootTimer == 0 && config.customYoink()) {
-					playCustomSound(YOINK,false);
-				} else if (config.customBloodshard()) {
-					playCustomSound(SHARD,false);
+		}
+		else
+		{
+			if (playShardSoundNextTick)
+			{
+				if (ownLootTimer == 0 && config.customYoink())
+				{
+					playCustomSound(YOINK, false);
+				}
+				else if (config.customBloodshard())
+				{
+					playCustomSound(SHARD, false);
 				}
 				playShardSoundNextTick = false;
 			}
@@ -571,8 +689,8 @@ public class AltUIPlugin extends Plugin
 		updateNearby();
 		updateHitpoints();
 
-		takingItem = Math.max(0,takingItem-1);
-		ownLootTimer = Math.max(0,ownLootTimer-1);
+		takingItem = Math.max(0, takingItem - 1);
+		ownLootTimer = Math.max(0, ownLootTimer - 1);
 	}
 
 	@Provides

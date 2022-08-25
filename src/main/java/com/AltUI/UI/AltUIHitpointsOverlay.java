@@ -24,6 +24,7 @@ public class AltUIHitpointsOverlay extends Overlay {
 	private int counter = 0;
 
 	public int gameWidth = 100;
+	public int barDistance=0;
 
 	public int barHeight = 25;
 
@@ -32,7 +33,7 @@ public class AltUIHitpointsOverlay extends Overlay {
 	private final AltUIPlugin plugin;
 
 	@Inject
-	public AltUIHitpointsOverlay(AltUIPlugin plugin, int CurrentHitpoints, int Hitpoints, int threshold, Color backgroundColor, Color foregroundColor, Color foregroundLowColor, Color foregroundOffColor, Color flashingColor) {
+	public AltUIHitpointsOverlay(AltUIPlugin plugin, int CurrentHitpoints, int Hitpoints, int threshold, Color backgroundColor, Color foregroundColor, Color foregroundLowColor, Color foregroundOffColor, Color flashingColor, int barDistance) {
 		super(plugin);
 		this.CurrentHitpoints = CurrentHitpoints;
 		this.Hitpoints = Hitpoints;
@@ -43,6 +44,7 @@ public class AltUIHitpointsOverlay extends Overlay {
 		this.foregroundOffColor = foregroundOffColor;
 		this.threshold = threshold;
 		this.plugin = plugin;
+		this.barDistance=barDistance;
 
 		setPosition(OverlayPosition.DYNAMIC);
 		setDragTargetable(false);
@@ -60,7 +62,7 @@ public class AltUIHitpointsOverlay extends Overlay {
 		if(CurrentHitpoints <= threshold && counter % flashInterval <= flashInterval/2) {
 			graphics.setColor(flashingColor);
 		}
-		graphics.fillRect(0,100,gameWidth,barHeight);
+		graphics.fillRect(0,barDistance,gameWidth,barHeight);
 
 		graphics.setColor(foregroundColor);
 
@@ -69,20 +71,20 @@ public class AltUIHitpointsOverlay extends Overlay {
 		if(CurrentHitpoints <= threshold) {
 			graphics.setColor(foregroundLowColor);
 		}
-		graphics.fillRect(0,100,(gameWidth - rightSideDisplayWidth) * CurrentHitpoints / Hitpoints ,barHeight);
+		graphics.fillRect(0,barDistance,(gameWidth - rightSideDisplayWidth) * CurrentHitpoints / Hitpoints ,barHeight);
 
 		if(displayHitpoints) {
 			graphics.setColor(foregroundColor);
-			graphics.fillRect(gameWidth - rightSideDisplayWidth + 1, 100, rightSideDisplayWidth - 1, barHeight);
+			graphics.fillRect(gameWidth - rightSideDisplayWidth + 1, barDistance, rightSideDisplayWidth - 1, barHeight);
 
 			String letsWrite = CurrentHitpoints + "/" + Hitpoints;
 			FontMetrics metrics = graphics.getFontMetrics();
 			graphics.setColor(new Color(backgroundColor.getRGB())); //get rid of alpha
-			graphics.drawString(letsWrite, gameWidth - (rightSideDisplayWidth / 2) - metrics.stringWidth(letsWrite) / 2, 100+(barHeight / 2 + metrics.getAscent() / 2));
+			graphics.drawString(letsWrite, gameWidth - (rightSideDisplayWidth / 2) - metrics.stringWidth(letsWrite) / 2, barDistance+(barHeight / 2 + metrics.getAscent() / 2));
 		}
 		if(displayOutline) {
 			graphics.setColor(Color.WHITE);
-			graphics.fillRect(0, 100+barHeight - 2, gameWidth, 2);
+			graphics.fillRect(0, barDistance+barHeight - 2, gameWidth, 2);
 		}
 
 
