@@ -3,10 +3,7 @@ package com.AltUI.UI;
 import com.AltUI.GroundItem;
 import com.AltUI.AltUIPlugin;
 import net.runelite.api.MenuAction;
-import net.runelite.client.ui.overlay.OverlayLayer;
-import net.runelite.client.ui.overlay.OverlayMenuEntry;
-import net.runelite.client.ui.overlay.OverlayPanel;
-import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.components.LineComponent;
 
 import java.awt.*;
@@ -35,10 +32,10 @@ public class AltUINearbyPanel extends OverlayPanel {
                 continue;
             }
             panelComponent.getChildren().add(LineComponent.builder()
-                        .left("*" + groundItem.quantity + " ")
-                        .leftColor(Color.WHITE)
-                        .right(plugin.getItemName(groundItem.id))
-                        .rightColor(Color.GREEN)
+                        .left("*" + groundItem.quantity + " ") //item quantity
+                        .leftColor(Color.WHITE) // color of above text
+                        .right(plugin.getItemName(groundItem.id)) // item name
+                        .rightColor(Color.GREEN) // color of about text
                         .build());
         }
 

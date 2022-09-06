@@ -60,7 +60,6 @@ public class AltUIPlugin extends Plugin
 	protected int Pbar = 0;
 
 	private AltUIHitpointsOverlay AltUIHitpointsPanel = null;
-	protected int Hbar = 0;
 	private AltUIRSNOverlay AltUIRSNOverlay = null;
 
 	private AltUIShoutOverlay AltUIShoutPanel = null;
@@ -359,10 +358,6 @@ public class AltUIPlugin extends Plugin
 			Pbar=config.PrayerSize();
 		else
 			Pbar=0;
-		if(config.HitpointsBar())
-			Pbar=config.HitpointsSize();
-		else
-			Hbar=0;
 		altUIAccountManager = new AltUIAccountManager(AltUIDirectory);
 		AltUIPrayerPanel = new AltUIPrayerOverlay(this, 0, 0, config.PrayerThreshold(), config.PrayerBackground(), config.PrayerForeground(), config.PrayerForegroundLow(), config.PrayerForegroundOff(), config.PrayerFlashing());
 		AltUIHitpointsPanel = new AltUIHitpointsOverlay(this, 0, 0, config.HitpointsThreshold(), config.HitpointsBackground(), config.HitpointsForeground(), config.HitpointsForegroundLow(), config.HitpointsForegroundOff(), config.HitpointsFlashing(),Pbar);
@@ -547,10 +542,6 @@ public class AltUIPlugin extends Plugin
 
 	public void updateConfig()
 	{
-		if(config.PrayerBar())
-			Pbar=config.PrayerSize();
-		else
-			Pbar=0;
 		AltUIPrayerPanel.backgroundColor = config.PrayerBackground();
 		AltUIPrayerPanel.foregroundColor = config.PrayerForeground();
 		AltUIPrayerPanel.flashingColor = config.PrayerFlashing();
@@ -562,7 +553,7 @@ public class AltUIPlugin extends Plugin
 		AltUIPrayerPanel.displayPrayer = config.PrayerPrayer();
 		AltUIPrayerPanel.flashInterval = config.flashyInterval();
 
-		if(config.HitpointsBar())
+		if(config.HitpointsBar() && config.PrayerBar())
 			AltUIHitpointsPanel.barDistance=config.PrayerSize();
 		else
 			AltUIHitpointsPanel.barDistance=0;
